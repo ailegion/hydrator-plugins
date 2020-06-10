@@ -37,7 +37,7 @@ import io.cdap.plugin.common.batch.ConfigurationUtils;
 import io.cdap.plugin.common.batch.JobUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.thrift.DelegationTokenSelector;
+import org.apache.hadoop.hive.metastore.security.DelegationTokenSelector;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;

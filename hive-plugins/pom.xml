@@ -23,16 +23,9 @@
     <version>2.4.0</version>
   </parent>
 
-  <name>Hive Hydrator Plugins</name>
+  <name>Hive Plugins</name>
   <artifactId>hive-plugins</artifactId>
   <modelVersion>4.0.0</modelVersion>
-
-  <repositories>
-    <repository>
-      <id>cloudera</id>
-      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
-    </repository>
-  </repositories>
 
   <dependencies>
     <dependency>
@@ -116,6 +109,10 @@
           <groupId>org.apache.hive</groupId>
           <artifactId>hive-serde</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -129,7 +126,7 @@
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
-        <version>3.3.0</version>
+        <version>3.5.0</version>
         <extensions>true</extensions>
         <configuration>
           <instructions>
@@ -158,6 +155,55 @@
             <parent>system:cdap-data-pipeline[6.0.0,7.0.0)</parent>
           </cdapArtifacts>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-jdom</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>jdom</groupId>
+                  <artifactId>jdom</artifactId>
+                  <version>1.0</version>
+                  <outputDirectory>
+                    ${project.build.directory}/jdom
+                  </outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <!-- Remove classes from the root package and re jar -->
+            <id>fix-jdom</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <delete>
+                  <fileset dir="${project.build.directory}/jdom" includes="*.class"/>
+                </delete>
+                <jar destfile="${project.build.directory}/jdom-1.0-fixed.jar">
+                  <fileset dir="${project.build.directory}/jdom"/>
+                </jar>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
