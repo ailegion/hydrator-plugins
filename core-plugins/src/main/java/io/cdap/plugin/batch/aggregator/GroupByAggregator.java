@@ -62,6 +62,15 @@ public class GroupByAggregator extends RecordAggregator {
     put("VARIANCE", "Variance");
     put("COLLECTLIST", "CollectList");
     put("COLLECTSET", "CollectSet");
+    put("LATESTDATE", "LatestDate");
+    put("EARLIESTDATE", "EarliestDate");
+    put("LONGESTSTRING", "LongestString");
+    put("SHORTESTSTRING", "ShortestString");
+    put("COUNTNULLS", "CountNulls");
+    put("CONCAT", "Concat");
+    put("CONCATDISTINCT", "ConcatDistinct");
+    put("LOGICALAND", "LogicalAnd");
+    put("LOGICALOR", "LogicalOr");
   }};
 
   private List<String> groupByFields;
