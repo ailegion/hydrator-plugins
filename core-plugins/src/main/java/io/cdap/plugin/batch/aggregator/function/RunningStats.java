@@ -23,7 +23,7 @@ package io.cdap.plugin.batch.aggregator.function;
  */
 public final class RunningStats  {
   private long numEntries = 0L;
-  private double mean1, mean2, mean3, mean4 = 0d;
+  private double mean1, mean2, mean3, mean4, sum, sumOfSquares, correctedSumOfSquares = 0d;
 
   /**
    * Pushes a number into machinery that computes a lot of statistics.
@@ -43,6 +43,10 @@ public final class RunningStats  {
       term1 * deltaN2 * (numEntries * numEntries - 3 * numEntries + 3) + 6 * deltaN2 * mean2 - 4 * deltaN * mean3;
     mean3 += term1 * deltaN * (numEntries - 2) - 3 * deltaN * mean2;
     mean2 += term1;
+    double subtractedMean = x - mean1;
+    correctedSumOfSquares += (subtractedMean * subtractedMean);
+    sum += x;
+    sumOfSquares += (x * x);
   }
 
   /**
@@ -81,5 +85,20 @@ public final class RunningStats  {
    */
   public double kurtosis() {
     return (double) numEntries * mean4 / (mean2 * mean2) - 3.0;
+  }
+
+  /**
+   * @return Corrected sum of squares
+   */
+  public double getCorrectedSumOfSquares() {
+    return correctedSumOfSquares;
+  }
+
+  /**
+   * @return Sum Of squares
+   */
+  public double getSumOfSquares() {
+    double sumSquared = sum*sum;
+    return sumOfSquares - (sumSquared/numEntries);
   }
 }
