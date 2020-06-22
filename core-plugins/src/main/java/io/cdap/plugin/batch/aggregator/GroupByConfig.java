@@ -28,6 +28,7 @@ import io.cdap.plugin.batch.aggregator.function.CollectList;
 import io.cdap.plugin.batch.aggregator.function.CollectSet;
 import io.cdap.plugin.batch.aggregator.function.Concat;
 import io.cdap.plugin.batch.aggregator.function.ConcatDistinct;
+import io.cdap.plugin.batch.aggregator.function.CorrectedSumOfSquares;
 import io.cdap.plugin.batch.aggregator.function.Count;
 import io.cdap.plugin.batch.aggregator.function.CountAll;
 import io.cdap.plugin.batch.aggregator.function.CountNulls;
@@ -43,6 +44,7 @@ import io.cdap.plugin.batch.aggregator.function.Min;
 import io.cdap.plugin.batch.aggregator.function.ShortestString;
 import io.cdap.plugin.batch.aggregator.function.Stddev;
 import io.cdap.plugin.batch.aggregator.function.Sum;
+import io.cdap.plugin.batch.aggregator.function.SumOfSquares;
 import io.cdap.plugin.batch.aggregator.function.Variance;
 
 import java.util.ArrayList;
@@ -232,6 +234,10 @@ public class GroupByConfig extends AggregatorConfig {
           return new LogicalAnd(field);
         case LOGICALOR:
           return new LogicalOr(field);
+        case CORRECTEDSUMOFSQUARES:
+          return new CorrectedSumOfSquares(field, fieldSchema);
+        case SUMOFSQUARES:
+          return new SumOfSquares(field, fieldSchema);
       }
       // should never happen
       throw new IllegalStateException("Unknown function type " + function);
@@ -288,6 +294,8 @@ public class GroupByConfig extends AggregatorConfig {
     CONCAT,
     CONCATDISTINCT,
     LOGICALAND,
-    LOGICALOR
+    LOGICALOR,
+    CORRECTEDSUMOFSQUARES,
+    SUMOFSQUARES
   }
 }

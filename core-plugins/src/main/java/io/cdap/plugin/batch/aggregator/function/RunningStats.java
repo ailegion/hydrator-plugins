@@ -17,16 +17,21 @@
 package io.cdap.plugin.batch.aggregator.function;
 
 /**
- * Computes Mean, Variance, Standard Deviation, Skewness and Kurtosis in single pass.
- * Uses Knuth and Welford for computing Standard Deviation in one pass through data.
+ * Computes Mean, Variance, Standard Deviation, Skewness and Kurtosis in single pass. Uses Knuth and
+ * Welford for computing Standard Deviation in one pass through data.
  * http://www.johndcook.com/blog/skewness_kurtosis/
  */
-public final class RunningStats  {
+public final class RunningStats {
+
   private long numEntries = 0L;
   private double mean1, mean2, mean3, mean4 = 0d;
+  private double sum = 0d;
+  private double sumOfSquares = 0d;
+  private double correctedSumOfSquares = 0d;
 
   /**
    * Pushes a number into machinery that computes a lot of statistics.
+   *
    * @param x number to be added to computing statistics.
    */
   public void push(double x) {
@@ -40,9 +45,14 @@ public final class RunningStats  {
     term1 = delta * deltaN * n1;
     mean1 += deltaN;
     mean4 +=
-      term1 * deltaN2 * (numEntries * numEntries - 3 * numEntries + 3) + 6 * deltaN2 * mean2 - 4 * deltaN * mean3;
+        term1 * deltaN2 * (numEntries * numEntries - 3 * numEntries + 3) + 6 * deltaN2 * mean2
+            - 4 * deltaN * mean3;
     mean3 += term1 * deltaN * (numEntries - 2) - 3 * deltaN * mean2;
     mean2 += term1;
+    double meanSubtract = x - mean1;
+    correctedSumOfSquares +=(meanSubtract * meanSubtract);
+    sum += x;
+    sumOfSquares += (x * x);
   }
 
   /**
@@ -81,5 +91,20 @@ public final class RunningStats  {
    */
   public double kurtosis() {
     return (double) numEntries * mean4 / (mean2 * mean2) - 3.0;
+  }
+
+  /**
+   * @return Corrected sum of squares
+   */
+  public double getCorrectedSumOfSquares(){
+    return correctedSumOfSquares;
+  }
+
+  /**
+   * @return Sum Of squares
+   */
+  public double getSumOfSquares() {
+    double sumSquared = sum*sum;
+    return sumOfSquares - (sumSquared/numEntries);
   }
 }

@@ -81,6 +81,14 @@
               {
                 "label": "Logical OR",
                 "value": "LogicalOr"
+              },
+              {
+                "label": "Corrected Sum of Squares",
+                "value": "CorrectedSumOfSquares"
+              },
+              {
+                "label": "Sum of Squares",
+                "value": "SumOfSquares"
               }
             ]
           }

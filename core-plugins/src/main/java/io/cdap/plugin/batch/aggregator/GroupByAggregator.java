@@ -71,6 +71,8 @@ public class GroupByAggregator extends RecordAggregator {
     put("CONCATDISTINCT", "ConcatDistinct");
     put("LOGICALAND", "LogicalAnd");
     put("LOGICALOR", "LogicalOr");
+    put("CORRECTEDSUMOFSQUARES", "CorrectedSumOfSquares");
+    put("SUMOFSQUARES", "SumOfSquares");
   }};
 
   private List<String> groupByFields;
