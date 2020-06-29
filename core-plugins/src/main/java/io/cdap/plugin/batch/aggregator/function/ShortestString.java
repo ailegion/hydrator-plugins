@@ -20,6 +20,9 @@ import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.data.schema.Schema.Type;
 
+/**
+ * Returns the shortest string in the group
+ */
 public class ShortestString implements AggregateFunction<String, ShortestString> {
 
   private final String fieldName;
@@ -54,7 +57,12 @@ public class ShortestString implements AggregateFunction<String, ShortestString>
 
   @Override
   public void mergeAggregates(ShortestString otherAgg) {
-    // no-op since first is already in this aggregation
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (shortestString == null || shortestString.length() > otherAgg.getAggregate().length()) {
+      shortestString = otherAgg.getAggregate();
+    }
   }
 
   @Override

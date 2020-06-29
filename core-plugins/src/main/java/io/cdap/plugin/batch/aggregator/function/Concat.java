@@ -21,11 +21,15 @@ import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.data.schema.Schema.Type;
 import java.util.Objects;
 
+/**
+ * Concatenates the values in the group with a comma
+ */
 public class Concat implements AggregateFunction<String, Concat> {
 
   private final String fieldName;
   private final Schema fieldSchema;
   private String concatString;
+  private boolean firstString = true;
 
   public Concat(String fieldName, Schema fieldSchema) {
     this.fieldName = fieldName;
@@ -48,16 +52,28 @@ public class Concat implements AggregateFunction<String, Concat> {
   @Override
   public void mergeValue(StructuredRecord record) {
     if (record.get(fieldName) != null) {
-      concatString = String.format("%s, %s", concatString, Objects
-          .requireNonNull(record.get(fieldName)).toString());
+      String value = Objects
+          .requireNonNull(record.get(fieldName)).toString();
+      if (firstString) {
+        concatString = value;
+        firstString = false;
+        return;
+      }
+      concatString = String.format("%s, %s", concatString, value);
     }
   }
 
   @Override
   public void mergeAggregates(Concat otherAgg) {
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (concatString.equals("")) {
+      concatString = otherAgg.getAggregate();
+      return;
+    }
     concatString = String.format("%s, %s", concatString, otherAgg.concatString);
   }
-
 
   @Override
   public String getAggregate() {
@@ -69,11 +85,4 @@ public class Concat implements AggregateFunction<String, Concat> {
     return fieldSchema;
   }
 
-//  @Override
-//  public void operateOn(StructuredRecord record) {
-//    if (record.get(fieldName) != null) {
-//      concatString = String.format("%s, %s", concatString, Objects
-//          .requireNonNull(record.get(fieldName)).toString());
-//    }
-//  }
 }

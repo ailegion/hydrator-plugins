@@ -16,16 +16,21 @@
 
 package io.cdap.plugin.batch.aggregator.function;
 
+import com.google.common.base.Strings;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.data.schema.Schema.Type;
 import java.util.Objects;
 
+/**
+ * Concatenates only distinct values in the group with a comma
+ */
 public class ConcatDistinct implements AggregateFunction<String, ConcatDistinct> {
 
   private final String fieldName;
   private final Schema fieldSchema;
   private String concatString;
+  private boolean firstString = true;
 
   public ConcatDistinct(String fieldName, Schema fieldSchema) {
     this.fieldName = fieldName;
@@ -50,6 +55,11 @@ public class ConcatDistinct implements AggregateFunction<String, ConcatDistinct>
     if (record.get(fieldName) != null) {
       String value = Objects.requireNonNull(record.get(fieldName)).toString();
       if (!concatString.contains(value)) {
+        if (firstString) {
+          concatString = value;
+          firstString = false;
+          return;
+        }
         concatString = String.format("%s, %s", concatString, value);
       }
     }
@@ -57,7 +67,14 @@ public class ConcatDistinct implements AggregateFunction<String, ConcatDistinct>
 
   @Override
   public void mergeAggregates(ConcatDistinct otherAgg) {
-    if(!concatString.contains(otherAgg.concatString)){
+    if (Strings.isNullOrEmpty(otherAgg.getAggregate())) {
+      return;
+    }
+    if (concatString.equals("")) {
+      concatString = otherAgg.getAggregate();
+      return;
+    }
+    if (!concatString.contains(otherAgg.concatString)) {
       concatString = String.format("%s, %s", concatString, otherAgg.concatString);
     }
   }

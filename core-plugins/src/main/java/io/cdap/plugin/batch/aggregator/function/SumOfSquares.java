@@ -19,29 +19,34 @@ package io.cdap.plugin.batch.aggregator.function;
 import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.plugin.batch.aggregator.AggregationUtils;
+import javax.annotation.Nullable;
 
 /**
- * Calculates the Standard Deviation
+ * Calculates the sum of squares
  */
 public class SumOfSquares implements AggregateFunction<Double, SumOfSquares> {
+
   private final String fieldName;
   private final Schema outputSchema;
-  private RunningStats stats;
+  private double sumOfSquares;
 
   public SumOfSquares(String fieldName, Schema fieldSchema) {
     this.fieldName = fieldName;
     boolean isNullable = fieldSchema.isNullable();
-    Schema.Type fieldType = isNullable ? fieldSchema.getNonNullable().getType() : fieldSchema.getType();
+    Schema.Type fieldType =
+        isNullable ? fieldSchema.getNonNullable().getType() : fieldSchema.getType();
     if (!AggregationUtils.isNumericType(fieldType)) {
       throw new IllegalArgumentException(String.format(
-          "Cannot compute sum of squares on field %s because its type %s is not numeric", fieldName, fieldType));
+          "Cannot compute corrected sum of squares on field %s because its type %s is not numeric",
+          fieldName, fieldType));
     }
-    outputSchema = isNullable ? Schema.nullableOf(Schema.of(Schema.Type.DOUBLE)) : Schema.of(Schema.Type.DOUBLE);
+    outputSchema = isNullable ? Schema.nullableOf(Schema.of(Schema.Type.DOUBLE))
+        : Schema.of(Schema.Type.DOUBLE);
   }
 
   @Override
   public void initialize() {
-    stats = new RunningStats();
+    this.sumOfSquares = 0d;
   }
 
   @Override
@@ -50,18 +55,25 @@ public class SumOfSquares implements AggregateFunction<Double, SumOfSquares> {
     if (val == null) {
       return;
     }
-    double value = ((Number) val).doubleValue();
-    stats.push(value);
+    sumOfSquares += Math.pow(((Number) val).doubleValue(), 2d);
   }
 
   @Override
   public void mergeAggregates(SumOfSquares otherAgg) {
-    // TODO
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (sumOfSquares == 0d) {
+      sumOfSquares = otherAgg.getAggregate();
+      return;
+    }
+    sumOfSquares += otherAgg.getAggregate();
   }
 
+  @Nullable
   @Override
   public Double getAggregate() {
-    return stats.getSumOfSquares();
+    return sumOfSquares;
   }
 
   @Override

@@ -23,6 +23,7 @@ import io.cdap.cdap.api.data.schema.Schema;
  * Counts the number of times a specific column has a non-null value.
  */
 public class Count implements AggregateFunction<Long, Count> {
+
   private static final Schema SCHEMA = Schema.of(Schema.Type.LONG);
   private final String fieldName;
   private long count;

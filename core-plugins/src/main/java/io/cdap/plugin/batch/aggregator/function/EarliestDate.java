@@ -22,6 +22,11 @@ import io.cdap.cdap.api.data.schema.Schema.LogicalType;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * Returns the earliest date in the group
+ *
+ * @param <T> type of aggregate value
+ */
 public class EarliestDate<T> implements AggregateFunction<T, EarliestDate<T>> {
 
   private final String fieldName;
@@ -64,7 +69,13 @@ public class EarliestDate<T> implements AggregateFunction<T, EarliestDate<T>> {
 
   @Override
   public void mergeAggregates(EarliestDate<T> otherAgg) {
-    // no-op since first is already in this aggregation
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (earliestDate == null || otherAgg.earliestDateValue.isBefore(earliestDateValue)) {
+      earliestDate = otherAgg.earliestDate;
+      earliestDateValue = otherAgg.earliestDateValue;
+    }
   }
 
   @Override

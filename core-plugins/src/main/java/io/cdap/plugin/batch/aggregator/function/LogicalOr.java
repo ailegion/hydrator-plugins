@@ -21,7 +21,8 @@ import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.data.schema.Schema.Type;
 
 /**
- * Counts the number of times a specific column has a non-null value.
+ * Returns true even if there is a single true value in the group, false if all values in the group
+ * are false.
  */
 public class LogicalOr implements AggregateFunction<Boolean, LogicalOr> {
 
@@ -40,14 +41,19 @@ public class LogicalOr implements AggregateFunction<Boolean, LogicalOr> {
   @Override
   public void mergeValue(StructuredRecord record) {
     Object value = record.get(fieldName);
-    if (value !=null && (Boolean) value) {
+    if (value != null && (Boolean) value) {
       logicalOr = true;
     }
   }
 
   @Override
   public void mergeAggregates(LogicalOr otherAgg) {
-    // no-op since first is already in this aggregation
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (otherAgg.getAggregate()) {
+      logicalOr = true;
+    }
   }
 
   @Override

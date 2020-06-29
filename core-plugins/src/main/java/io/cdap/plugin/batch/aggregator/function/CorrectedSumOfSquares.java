@@ -24,24 +24,33 @@ import io.cdap.plugin.batch.aggregator.AggregationUtils;
  * Calculates the Standard Deviation
  */
 public class CorrectedSumOfSquares implements AggregateFunction<Double, CorrectedSumOfSquares> {
+
   private final String fieldName;
   private final Schema outputSchema;
-  private RunningStats stats;
+  private long numEntries;
+  private double sum, sumOfSquares;
+  private Double correctSumOfSquares;
 
   public CorrectedSumOfSquares(String fieldName, Schema fieldSchema) {
     this.fieldName = fieldName;
     boolean isNullable = fieldSchema.isNullable();
-    Schema.Type fieldType = isNullable ? fieldSchema.getNonNullable().getType() : fieldSchema.getType();
+    Schema.Type fieldType =
+        isNullable ? fieldSchema.getNonNullable().getType() : fieldSchema.getType();
     if (!AggregationUtils.isNumericType(fieldType)) {
       throw new IllegalArgumentException(String.format(
-          "Cannot compute corrected sum of squares on field %s because its type %s is not numeric", fieldName, fieldType));
+          "Cannot compute corrected sum of squares on field %s because its type %s is not numeric",
+          fieldName, fieldType));
     }
-    outputSchema = isNullable ? Schema.nullableOf(Schema.of(Schema.Type.DOUBLE)) : Schema.of(Schema.Type.DOUBLE);
+    outputSchema = isNullable ? Schema.nullableOf(Schema.of(Schema.Type.DOUBLE))
+        : Schema.of(Schema.Type.DOUBLE);
   }
 
   @Override
   public void initialize() {
-    stats = new RunningStats();
+    this.correctSumOfSquares = null;
+    this.sum = 0d;
+    this.sumOfSquares = 0d;
+    this.numEntries = 0L;
   }
 
   @Override
@@ -50,18 +59,35 @@ public class CorrectedSumOfSquares implements AggregateFunction<Double, Correcte
     if (val == null) {
       return;
     }
-    double value = ((Number) val).doubleValue();
-    stats.push(value);
+    Number value = (Number) val;
+    numEntries++;
+    sum += value.doubleValue();
+    sumOfSquares += value.doubleValue() * value.doubleValue();
   }
 
   @Override
   public void mergeAggregates(CorrectedSumOfSquares otherAgg) {
-    // TODO
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (numEntries == 0) {
+      numEntries = otherAgg.numEntries;
+      sum = otherAgg.sum;
+      sumOfSquares = otherAgg.sumOfSquares;
+      return;
+    }
+    numEntries += otherAgg.numEntries;
+    sum += otherAgg.sum;
+    sumOfSquares += otherAgg.sumOfSquares;
   }
 
   @Override
   public Double getAggregate() {
-    return stats.getCorrectedSumOfSquares();
+    if (correctSumOfSquares == null) {
+      double sumSquared = sum * sum;
+      correctSumOfSquares = sumOfSquares - (sumSquared / numEntries);
+    }
+    return correctSumOfSquares;
   }
 
   @Override

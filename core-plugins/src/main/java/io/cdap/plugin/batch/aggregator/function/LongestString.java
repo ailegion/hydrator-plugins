@@ -20,6 +20,9 @@ import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.data.schema.Schema.Type;
 
+/**
+ * Returns the longest string in the group
+ */
 public class LongestString implements AggregateFunction<String, LongestString> {
 
   private final String fieldName;
@@ -54,7 +57,12 @@ public class LongestString implements AggregateFunction<String, LongestString> {
 
   @Override
   public void mergeAggregates(LongestString otherAgg) {
-    // no-op since first is already in this aggregation
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (otherAgg.getAggregate().length() > longestString.length()) {
+      longestString = otherAgg.getAggregate();
+    }
   }
 
   @Override

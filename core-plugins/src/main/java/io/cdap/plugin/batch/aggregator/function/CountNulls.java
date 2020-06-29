@@ -20,7 +20,7 @@ import io.cdap.cdap.api.data.format.StructuredRecord;
 import io.cdap.cdap.api.data.schema.Schema;
 
 /**
- * Counts the number of times a specific column has a non-null value.
+ * Returns the number of null values in the group
  */
 public class CountNulls implements AggregateFunction<Long, CountNulls> {
 

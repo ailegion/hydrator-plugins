@@ -22,6 +22,11 @@ import io.cdap.cdap.api.data.schema.Schema.LogicalType;
 import java.time.LocalDate;
 import java.util.Optional;
 
+/**
+ * Returns the latest date in the group
+ *
+ * @param <T> type of aggregate value
+ */
 public class LatestDate<T> implements AggregateFunction<T, LatestDate<T>> {
 
   private final String fieldName;
@@ -64,7 +69,13 @@ public class LatestDate<T> implements AggregateFunction<T, LatestDate<T>> {
 
   @Override
   public void mergeAggregates(LatestDate<T> otherAgg) {
-    // no-op since first is already in this aggregation
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (latestDate == null || otherAgg.latestDateValue.isAfter(latestDateValue)) {
+      latestDate = otherAgg.latestDate;
+      latestDateValue = otherAgg.latestDateValue;
+    }
   }
 
   @Override

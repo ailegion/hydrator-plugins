@@ -21,7 +21,8 @@ import io.cdap.cdap.api.data.schema.Schema;
 import io.cdap.cdap.api.data.schema.Schema.Type;
 
 /**
- * Counts the number of times a specific column has a non-null value.
+ * Returns true if all the values in the group are true, false even if there is a single false
+ * value
  */
 public class LogicalAnd implements AggregateFunction<Boolean, LogicalAnd> {
 
@@ -47,7 +48,12 @@ public class LogicalAnd implements AggregateFunction<Boolean, LogicalAnd> {
 
   @Override
   public void mergeAggregates(LogicalAnd otherAgg) {
-    // no-op since first is already in this aggregation
+    if (otherAgg.getAggregate() == null) {
+      return;
+    }
+    if (!otherAgg.getAggregate()) {
+      logicalAnd = false;
+    }
   }
 
   @Override
