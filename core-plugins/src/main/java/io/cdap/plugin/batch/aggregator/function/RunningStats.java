@@ -40,7 +40,7 @@ public final class RunningStats  {
     term1 = delta * deltaN * n1;
     mean1 += deltaN;
     mean4 +=
-        term1 * deltaN2 * (numEntries * numEntries - 3 * numEntries + 3) + 6 * deltaN2 * mean2 - 4 * deltaN * mean3;
+      term1 * deltaN2 * (numEntries * numEntries - 3 * numEntries + 3) + 6 * deltaN2 * mean2 - 4 * deltaN * mean3;
     mean3 += term1 * deltaN * (numEntries - 2) - 3 * deltaN * mean2;
     mean2 += term1;
   }

@@ -62,7 +62,7 @@ public class CorrectedSumOfSquares implements AggregateFunction<Double, Correcte
     Number value = (Number) val;
     numEntries++;
     sum += value.doubleValue();
-    sumOfSquares += value.doubleValue() * value.doubleValue();
+    sumOfSquares += Math.pow(value.doubleValue(), 2d);
   }
 
   @Override

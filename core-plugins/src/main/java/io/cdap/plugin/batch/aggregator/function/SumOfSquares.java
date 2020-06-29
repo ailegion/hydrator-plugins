@@ -37,7 +37,7 @@ public class SumOfSquares implements AggregateFunction<Double, SumOfSquares> {
         isNullable ? fieldSchema.getNonNullable().getType() : fieldSchema.getType();
     if (!AggregationUtils.isNumericType(fieldType)) {
       throw new IllegalArgumentException(String.format(
-          "Cannot compute corrected sum of squares on field %s because its type %s is not numeric",
+          "Cannot compute sum of squares on field %s because its type %s is not numeric",
           fieldName, fieldType));
     }
     outputSchema = isNullable ? Schema.nullableOf(Schema.of(Schema.Type.DOUBLE))

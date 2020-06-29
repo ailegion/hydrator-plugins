@@ -19,10 +19,13 @@ package io.cdap.plugin.batch.aggregator.function;
 import io.cdap.cdap.api.data.schema.Schema;
 import org.junit.Test;
 
+/**
+ *
+ */
 public class CorrectedSumOfSquaresTest extends NumberTest {
 
   @Test
-  public void testIntVar() {
+  public void testCorrectedSumOfSquares() {
     Schema schema = Schema.recordOf("test", Schema.Field.of("x", Schema.of(Schema.Type.INT)));
     CorrectedSumOfSquares correctedSumOfSquares = new CorrectedSumOfSquares("x",
         Schema.of(Schema.Type.INT));
